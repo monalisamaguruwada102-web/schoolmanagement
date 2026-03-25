@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounts Department — Student Fees System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --surface: #121a16;
+    --surface2: #18241e;
+    --border: #1f2e26;
+    --accent: #22d3a0;
+    --accent2: #16a377;
+    --blue: #4f8ef7;
+    --amber: #f5a623;
+    --red: #f75555;
+    --text: #e8f2ee;
+    --muted: #5a7a6e;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+
+  /* NAV */
+  nav {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 200;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 12px; }
+  .nav-brand .logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--amber), #c47d0e);
+    display: grid; place-items: center; font-size: 18px;
+  }
+  .nav-brand h1 { font-family: var(--font-head); font-size: 1rem; font-weight: 700; }
+  .nav-brand span { font-size: .75rem; color: var(--muted); display: block; }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links a {
+    padding: 8px 16px; border-radius: 8px; text-decoration: none;
+    font-size: .85rem; font-weight: 500; color: var(--muted); transition: .2s;
+  }
+  .nav-links a.active, .nav-links a:hover { background: var(--surface2); color: var(--text); }
+  .nav-links a.active { color: var(--amber); }
+  .dept-badge {
+    background: linear-gradient(135deg, var(--amber), #c47d0e);
+    color: #1a0f00; padding: 6px 14px; border-radius: 20px;
+    font-size: .78rem; font-weight: 700; font-family: var(--font-mono);
+  }
+
+  /* LAYOUT */
+  .wrapper { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+  /* STATS */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.2rem; position: relative; overflow: hidden; transition: .2s;
+  }
+  .stat-card:hover { border-color: var(--card-color, var(--accent)); }
+  .stat-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: var(--card-color, var(--accent));
+  }
+  .stat-card .val {
+    font-family: var(--font-head); font-size: 1.75rem; font-weight: 800;
+    color: var(--card-color, var(--accent));
+  }
+  .stat-card .lbl {
+    font-size: .7rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .8px; margin-top: 4px;
+  }
+  .stat-card .sub { font-size: .7rem; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+
+  /* MAIN GRID */
+  .main-grid { display: grid; grid-template-columns: 370px 1fr; gap: 20px; align-items: start; }
+
+  /* PANEL */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .panel-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+  }
+  .panel-header h2 { font-family: var(--font-head); font-size: .95rem; font-weight: 700; }
+  .panel-header span { font-size: .75rem; color: var(--muted); }
+  .panel-body { padding: 1.25rem; }
+
+  /* FORM */
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    display: block; font-size: .72rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px;
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--font-body); font-size: .88rem;
+    outline: none; transition: .2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,166,35,.1);
+  }
+  .form-group input::placeholder { color: var(--muted); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn {
+    width: 100%; padding: 11px; border-radius: 10px; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: .9rem; font-weight: 600; transition: .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--amber), #c47d0e); color: #1a0f00;
+  }
+  .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-primary:active { transform: none; }
+  .btn-outline {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+  }
+  .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* SECTION TABS */
+  .section-tabs { display: flex; gap: 6px; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .stab {
+    padding: 7px 16px; border-radius: 8px; font-size: .82rem; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: .2s;
+  }
+  .stab.active { background: var(--surface2); color: var(--amber); border-color: var(--amber); }
+
+  /* CONTROLS BAR */
+  .controls-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; }
+  .search-wrap input {
+    width: 100%; padding: 9px 12px 9px 36px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--font-body); font-size: .85rem; outline: none; transition: .2s;
+  }
+  .search-wrap input:focus { border-color: var(--amber); }
+  .search-wrap .si { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .8rem; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 14px; text-align: left; font-size: .7rem; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .8px;
+    border-bottom: 1px solid var(--border); background: var(--surface2); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: .15s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr:last-child { border-bottom: none; }
+  td { padding: 12px 14px; font-size: .85rem; vertical-align: middle; }
+  .student-name { font-weight: 700; font-family: var(--font-head); font-size: .92rem; }
+  .student-id-text { font-family: var(--font-mono); font-size: .68rem; color: var(--muted); margin-top: 2px; }
+
+  /* PROGRESS BAR */
+  .progress-bar-bg {
+    height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 4px;
+  }
+  .progress-bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+  .progress-label { font-family: var(--font-mono); font-size: .66rem; color: var(--muted); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: .7rem; font-weight: 600; font-family: var(--font-mono);
+  }
+  .badge-paid    { background: rgba(34,211,160,.12); border: 1px solid rgba(34,211,160,.3); color: var(--accent); }
+  .badge-partial { background: rgba(245,166,35,.12); border: 1px solid rgba(245,166,35,.3); color: var(--amber); }
+  .badge-unpaid  { background: rgba(247,85,85,.12); border: 1px solid rgba(247,85,85,.3); color: var(--red); }
+  .badge-paid::before    { content: '●'; font-size: .5rem; animation: pulse 2s ease infinite; }
+  .badge-partial::before { content: '◑'; font-size: .5rem; }
+  .badge-unpaid::before  { content: '○'; font-size: .5rem; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ACTION BUTTONS */
+  .action-btns { display: flex; gap: 5px; }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: .2s;
+    display: grid; place-items: center; font-size: .8rem;
+  }
+  .icon-btn:hover { background: var(--surface2); }
+  .icon-btn.pay:hover  { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover  { border-color: var(--red); color: var(--red); }
+  .icon-btn.hist:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* EMPTY / LOADING */
+  .empty { text-align: center; padding: 3rem 2rem; color: var(--muted); }
+  .empty .icon { font-size: 2.5rem; margin-bottom: .75rem; opacity: .35; }
+  .empty h3 { font-family: var(--font-head); font-size: 1.05rem; color: var(--text); margin-bottom: .4rem; }
+  .empty p { font-size: .82rem; }
+  .spinner {
+    width: 26px; height: 26px; border: 3px solid var(--border);
+    border-top-color: var(--amber); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 2rem auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    z-index: 300; display: none; place-items: center; padding: 1rem;
+  }
+  .modal-overlay.open { display: grid; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    width: 100%; max-width: 440px; overflow: hidden; animation: modalIn .2s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:none; } }
+  .modal-head {
+    padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; background: var(--surface2);
+  }
+  .modal-head h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 700; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; font-size: 1rem; transition: .2s;
+  }
+  .modal-close:hover { background: var(--border); color: var(--text); }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer {
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 10px;
+  }
+  .modal-footer .btn { flex: 1; }
+
+  /* PAY INFO BOX */
+  .pay-info {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1rem; margin-bottom: 1.25rem;
+  }
+  .pay-info .pi-name { font-family: var(--font-head); font-size: .98rem; font-weight: 700; margin-bottom: .2rem; }
+  .pay-info .pi-meta { font-size: .75rem; color: var(--muted); font-family: var(--font-mono); }
+  .pi-numbers { display: flex; justify-content: space-between; font-size: .72rem; margin-top: .4rem; }
+  .pi-numbers span { font-family: var(--font-mono); }
+  .pi-numbers .balance-val { color: var(--amber); }
+
+  /* HISTORY LIST */
+  .history-list { max-height: 320px; overflow-y: auto; }
+  .history-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 0; border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .hi-receipt { font-family: var(--font-mono); font-size: .68rem; color: var(--muted); margin-top: 2px; }
+  .hi-amount { font-family: var(--font-mono); font-size: .95rem; font-weight: 600; color: var(--accent); }
+
+  /* AUDIT LOG */
+  .audit-log-list { max-height: 280px; overflow-y: auto; }
+  .audit-item {
+    display: flex; gap: 12px; padding: .7rem 1.25rem; border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0; margin-top: 5px;
+  }
+  .audit-dot.del { background: var(--red); }
+  .audit-dot.pay { background: var(--amber); }
+  .audit-action { font-family: var(--font-mono); font-size: .68rem; font-weight: 600; color: var(--accent); }
+  .audit-action.del { color: var(--red); }
+  .audit-action.pay { color: var(--amber); }
+  .audit-detail { font-size: .76rem; color: var(--muted); margin-top: 1px; }
+  .audit-time { font-size: .65rem; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 400;
+    padding: .85rem 1.25rem; border-radius: 12px; font-size: .85rem; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    transform: translateY(80px); opacity: 0; transition: .3s ease; pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  #toast.show { transform: none; opacity: 1; }
+  #toast.success { background: rgba(34,211,160,.15); border: 1px solid rgba(34,211,160,.4); color: var(--accent); }
+  #toast.error   { background: rgba(247,85,85,.15); border: 1px solid rgba(247,85,85,.4); color: var(--red); }
+
+  /* CONFIRM */
+  .confirm-icon { font-size: 2.5rem; text-align: center; margin-bottom: .75rem; }
+  .confirm-msg { text-align: center; color: var(--muted); font-size: .88rem; line-height: 1.6; }
+  .confirm-msg strong { color: var(--text); display: block; font-family: var(--font-head); font-size: 1rem; margin-bottom: .4rem; }
+
+  @media (max-width: 1100px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .wrapper { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="logo">⚙</div>
+    <div>
+      <h1>UniFinance Portal</h1>
+      <span>Student Fees Management System</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="accounts.html" class="active">⚙ Accounts</a>
+    <a href="../registry/registry.html">📋 Registry</a>
+  </div>
+  <div class="dept-badge">ACCOUNTS DEPT</div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- STATS ROW -->
+  <div class="stats-grid">
+    <div class="stat-card" style="--card-color:var(--text)">
+      <div class="val" id="statTotal">—</div>
+      <div class="lbl">Total Students</div>
+    </div>
+    <div class="stat-card" style="--card-color:var(--accent)">
+      <div class="val" id="statPaid">—</div>
+      <div class="lbl">Fully Paid</div>
+    </div>
+    <div class="stat-card" style="--card-color:var(--amber)">
+      <div class="val" id="statPartial">—</div>
+      <div class="lbl">Partial</div>
+    </div>
+    <div class="stat-card" style="--card-color:var(--red)">
+      <div class="val" id="statUnpaid">—</div>
+      <div class="lbl">Unpaid</div>
+    </div>
+    <div class="stat-card" style="--card-color:var(--blue)">
+      <div class="val" id="statCollected">—</div>
+      <div class="lbl">Collected (USD)</div>
+    </div>
+    <div class="stat-card" style="--card-color:var(--red)">
+      <div class="val" id="statOutstanding">—</div>
+      <div class="lbl">Outstanding (USD)</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Form + Audit -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- ADD STUDENT FORM -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>➕ Register New Student</h2>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Student ID</label>
+            <input type="text" id="fStudentId" placeholder="e.g. STU007">
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="fFullName" placeholder="e.g. Chipo Mutasa">
+          </div>
+          <div class="form-group">
+            <label>Course / Programme</label>
+            <input type="text" id="fCourse" placeholder="e.g. Bachelor of Commerce">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Total Fees (USD)</label>
+              <input type="number" id="fTotalFees" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+              <label>Initial Payment</label>
+              <input type="number" id="fFeesPaid" placeholder="0.00" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Enrollment Date</label>
+            <input type="date" id="fEnrollDate">
+          </div>
+          <button class="btn btn-primary" onclick="addStudent()">
+            ✦ Register Student
+          </button>
+        </div>
+      </div>
+
+      <!-- AUDIT LOG -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🗂 Audit Log</h2>
+          <span id="auditCount">0 events</span>
+        </div>
+        <div class="audit-log-list" id="auditList">
+          <div class="empty" style="padding:1.5rem">
+            <div class="icon">📋</div>
+            <h3>No Activity Yet</h3>
+            <p>Actions taken this session appear here.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- RIGHT: Students Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>👤 All Students</h2>
+        <span id="tableCount">Loading…</span>
+      </div>
+      <div class="panel-body" style="padding:.85rem 1rem">
+
+        <div class="section-tabs">
+          <button class="stab active" onclick="setFilter('all',this)">All</button>
+          <button class="stab" onclick="setFilter('paid',this)">✓ Paid</button>
+          <button class="stab" onclick="setFilter('partial',this)">◑ Partial</button>
+          <button class="stab" onclick="setFilter('unpaid',this)">○ Unpaid</button>
+        </div>
+
+        <div class="controls-bar">
+          <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search name, ID or course…" oninput="applyFilters()">
+          </div>
+          <button class="btn btn-outline" style="width:auto;padding:9px 16px;font-size:.82rem" onclick="loadStudents()">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Fees Progress</th>
+                <th>Balance</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsBody">
+              <tr><td colspan="7"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div><!-- /right -->
+
+  </div><!-- /main-grid -->
+</div><!-- /wrapper -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>💳 Record Payment</h3>
+      <button class="modal-close" onclick="closeModal('payModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pay-info" id="payInfo"></div>
+      <div class="form-group">
+        <label>Payment Amount (USD)</label>
+        <input type="number" id="payAmount" placeholder="Enter amount" min="0.01" step="0.01">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('payModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitPayment()">✦ Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="histModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📄 Payment History</h3>
+      <button class="modal-close" onclick="closeModal('histModal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding-bottom:.5rem">
+      <div id="histTitle" style="font-family:var(--font-head);font-size:.95rem;margin-bottom:1rem;color:var(--muted)"></div>
+      <div class="history-list" id="histList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('histModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚠ Confirm Delete</h3>
+      <button class="modal-close" onclick="closeModal('delModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-icon">🗑</div>
+      <div class="confirm-msg">
+        <strong id="delStudentName"></strong>
+        This will permanently remove the student and all their payment records. This action cannot be undone.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('delModal')">Cancel</button>
+      <button class="btn" style="background:rgba(247,85,85,.15);border:1px solid rgba(247,85,85,.4);color:var(--red);flex:1"
+              onclick="confirmDelete()">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = './index.php';
+let allStudents = [];
+let filtered = [];
+let activeFilter = 'all';
+let activePayStudentId = null;
+let activeDelStudentId = null;
+const localAudit = [];
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('fEnrollDate').value = new Date().toISOString().split('T')[0];
+  loadStudents();
+  loadStats();
+});
+
+// ===== LOAD STUDENTS =====
+async function loadStudents() {
+  try {
+    const r = await fetch(`${API}?action=get_all_students`);
+    const d = await r.json();
+    if (d.success) { allStudents = d.data; applyFilters(); }
+  } catch(e) {
+    document.getElementById('studentsBody').innerHTML =
+      `<tr><td colspan="7"><div class="empty"><div class="icon">⚠</div>
+       <h3>Connection Error</h3><p>Cannot reach server. Check PHP and database config.</p>
+       </div></td></tr>`;
+  }
+}
+
+// ===== LOAD STATS =====
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}?action=get_stats`);
+    const d = await r.json();
+    if (d.success) {
+      const s = d.data;
+      document.getElementById('statTotal').textContent       = s.total;
+      document.getElementById('statPaid').textContent        = s.paid;
+      document.getElementById('statPartial').textContent     = s.partial;
+      document.getElementById('statUnpaid').textContent      = s.unpaid;
+      document.getElementById('statCollected').textContent   = '$' + fmtMoney(s.collected);
+      document.getElementById('statOutstanding').textContent = '$' + fmtMoney(s.outstanding);
+    }
+  } catch(e) {}
+}
+
+// ===== FILTER + SEARCH =====
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filtered = allStudents.filter(s => {
+    const matchFilter = activeFilter === 'all' || s.payment_status === activeFilter;
+    const matchSearch = !q
+      || s.full_name.toLowerCase().includes(q)
+      || s.student_id.toLowerCase().includes(q)
+      || s.course.toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+  renderTable();
+}
+
+// ===== RENDER TABLE =====
+function renderTable() {
+  const tbody = document.getElementById('studentsBody');
+  document.getElementById('tableCount').textContent =
+    `${filtered.length} student${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty"><div class="icon">🎓</div>
+      <h3>No students found</h3><p>Try a different filter or search term.</p>
+      </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((s, i) => {
+    const total   = parseFloat(s.total_fees);
+    const paid    = parseFloat(s.fees_paid);
+    const balance = parseFloat(s.balance);
+    const pct     = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+    const barColor = pct === 100 ? 'var(--accent)' : pct > 0 ? 'var(--amber)' : 'var(--red)';
+
+    const badgeMap = {
+      paid:    `<span class="badge badge-paid">PAID</span>`,
+      partial: `<span class="badge badge-partial">PARTIAL</span>`,
+      unpaid:  `<span class="badge badge-unpaid">UNPAID</span>`
+    };
+
+    const payBtn = s.payment_status !== 'paid'
+      ? `<button class="icon-btn pay" title="Record Payment" onclick="openPayModal('${s.student_id}')">💳</button>`
+      : `<button class="icon-btn" style="opacity:.25;cursor:default" disabled title="Fully Paid">✓</button>`;
+
+    return `<tr>
+      <td style="font-family:var(--font-mono);font-size:.68rem;color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:9px;background:var(--surface2);
+            border:1px solid rgba(245,166,35,.2);display:grid;place-items:center;font-size:.62rem;
+            font-weight:700;color:var(--amber);font-family:var(--font-mono);flex-shrink:0">
+            ${initials(s.full_name)}
+          </div>
+          <div>
+            <div class="student-name">${s.full_name}</div>
+            <div class="student-id-text">${s.student_id}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:.78rem;color:var(--muted);max-width:150px">${s.course}</td>
+      <td style="min-width:110px">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+        <div class="progress-label">${pct}% &middot; $${fmtMoney(paid)} / $${fmtMoney(total)}</div>
+      </td>
+      <td style="font-family:var(--font-mono);font-size:.8rem;color:${balance > 0 ? 'var(--amber)' : 'var(--accent)'}">
+        $${fmtMoney(balance)}
+      </td>
+      <td>${badgeMap[s.payment_status] || ''}</td>
+      <td>
+        <div class="action-btns">
+          ${payBtn}
+          <button class="icon-btn hist" title="Payment History"
+            onclick="openHistModal('${s.student_id}','${s.full_name.replace(/'/g,"\\'")}')">📄</button>
+          <button class="icon-btn del" title="Delete Student"
+            onclick="openDelModal('${s.student_id}','${s.full_name.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== ADD STUDENT =====
+async function addStudent() {
+  const student_id      = document.getElementById('fStudentId').value.trim();
+  const full_name       = document.getElementById('fFullName').value.trim();
+  const course          = document.getElementById('fCourse').value.trim();
+  const total_fees      = parseFloat(document.getElementById('fTotalFees').value) || 0;
+  const fees_paid       = parseFloat(document.getElementById('fFeesPaid').value) || 0;
+  const enrollment_date = document.getElementById('fEnrollDate').value;
+
+  if (!student_id || !full_name || !course || total_fees <= 0) {
+    showToast('⚠ Fill in all required fields.', 'error'); return;
+  }
+  if (fees_paid > total_fees) {
+    showToast('⚠ Initial payment cannot exceed total fees.', 'error'); return;
+  }
+
+  try {
+    const r = await fetch(`${API}?action=add_student`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id, full_name, course, total_fees, fees_paid, enrollment_date })
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast('✓ ' + full_name + ' registered successfully.', 'success');
+      pushAudit('ADD_STUDENT', student_id, `${full_name} — ${course}. Initial payment: $${fmtMoney(fees_paid)} of $${fmtMoney(total_fees)}`);
+      clearForm();
+      loadStudents();
+      loadStats();
+    } else {
+      showToast('✕ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('✕ Server error. Check connection.', 'error'); }
+}
+
+function clearForm() {
+  ['fStudentId','fFullName','fCourse','fTotalFees','fFeesPaid'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+// ===== PAYMENT MODAL =====
+function openPayModal(studentId) {
+  const s = allStudents.find(x => x.student_id === studentId);
+  if (!s) return;
+  activePayStudentId = studentId;
+
+  const total   = parseFloat(s.total_fees);
+  const paid    = parseFloat(s.fees_paid);
+  const balance = parseFloat(s.balance);
+  const pct     = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+  document.getElementById('payInfo').innerHTML = `
+    <div class="pi-name">${s.full_name}</div>
+    <div class="pi-meta">${s.student_id} &middot; ${s.course}</div>
+    <div style="margin-top:.75rem">
+      <div class="progress-bar-bg" style="height:6px">
+        <div class="progress-bar-fill" style="width:${pct}%;background:var(--amber)"></div>
+      </div>
+      <div class="pi-numbers">
+        <span>Paid: <strong style="color:var(--accent)">$${fmtMoney(paid)}</strong></span>
+        <span class="balance-val" style="color:var(--amber)">Balance: $${fmtMoney(balance)}</span>
+        <span>Total: $${fmtMoney(total)}</span>
+      </div>
+    </div>`;
+
+  document.getElementById('payAmount').value = '';
+  document.getElementById('payAmount').max   = balance;
+  openModal('payModal');
+}
+
+async function submitPayment() {
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  if (!amount || amount <= 0) { showToast('⚠ Enter a valid payment amount.', 'error'); return; }
+
+  try {
+    const r = await fetch(`${API}?action=update_fees`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: activePayStudentId, payment_amount: amount })
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast('✓ ' + d.message, 'success');
+      pushAudit('UPDATE_PAYMENT', activePayStudentId, `Payment of $${fmtMoney(amount)} recorded.`);
+      closeModal('payModal');
+      loadStudents();
+      loadStats();
+    } else {
+      showToast('✕ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('✕ Server error.', 'error'); }
+}
+
+// ===== HISTORY MODAL =====
+async function openHistModal(studentId, name) {
+  document.getElementById('histTitle').textContent = name + ' · ' + studentId;
+  document.getElementById('histList').innerHTML = '<div class="spinner"></div>';
+  openModal('histModal');
+  try {
+    const r = await fetch(`${API}?action=get_payments&student_id=${studentId}`);
+    const d = await r.json();
+    const list = document.getElementById('histList');
+    if (d.success && d.data.length) {
+      list.innerHTML = d.data.map(p => `
+        <div class="history-item">
+          <div>
+            <div style="font-size:.85rem;font-weight:600">Payment</div>
+            <div class="hi-receipt">${p.receipt_number}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-top:3px">${fmtDateTime(p.payment_date)}</div>
+          </div>
+          <div class="hi-amount">+$${fmtMoney(p.amount)}</div>
+        </div>`).join('');
+    } else {
+      list.innerHTML = `<div class="empty" style="padding:2rem"><div class="icon">📄</div>
+        <h3>No Payments</h3><p>No recorded transactions yet.</p></div>`;
+    }
+  } catch(e) {
+    document.getElementById('histList').innerHTML =
+      '<p style="color:var(--red);padding:1rem;font-size:.85rem">Failed to load history.</p>';
+  }
+}
+
+// ===== DELETE MODAL =====
+function openDelModal(studentId, name) {
+  activeDelStudentId = studentId;
+  document.getElementById('delStudentName').textContent = name;
+  openModal('delModal');
+}
+
+async function confirmDelete() {
+  try {
+    const r = await fetch(`${API}?action=delete_student`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: activeDelStudentId })
+    });
+    const d = await r.json();
+    if (d.success) {
+      const name = document.getElementById('delStudentName').textContent;
+      showToast('✓ ' + name + ' removed.', 'success');
+      pushAudit('DELETE_STUDENT', activeDelStudentId, `${name} permanently removed from system.`);
+      closeModal('delModal');
+      loadStudents();
+      loadStats();
+    } else {
+      showToast('✕ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('✕ Server error.', 'error'); }
+}
+
+// ===== AUDIT LOG =====
+function pushAudit(action, studentId, details) {
+  localAudit.unshift({ action, student_id: studentId, details, timestamp: new Date().toISOString() });
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const el = document.getElementById('auditList');
+  document.getElementById('auditCount').textContent = localAudit.length + ' event' + (localAudit.length !== 1 ? 's' : '');
+  if (!localAudit.length) return;
+
+  el.innerHTML = localAudit.map(a => {
+    const isDel = a.action === 'DELETE_STUDENT';
+    const isPay = a.action === 'UPDATE_PAYMENT';
+    const cls   = isDel ? 'del' : isPay ? 'pay' : '';
+    return `<div class="audit-item">
+      <div class="audit-dot ${cls}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="audit-action ${cls}">${a.action.replace(/_/g,' ')}</div>
+        <div class="audit-detail">${a.details}</div>
+        <div class="audit-time">${fmtDateTime(a.timestamp)}</div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--muted);flex-shrink:0;padding-left:8px">${a.student_id}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MODAL HELPERS =====
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+}
+
+// ===== UTILS =====
+function initials(name) {
+  return name.split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase();
+}
+function fmtMoney(n) {
+  return parseFloat(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtDateTime(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+}
+</script>
+</body>
+</html>

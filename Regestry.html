@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registry Department — Student Fees System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- ===== CSS ===== -->
+<style>
+  :root {
+    --bg: #0a0f0d;   --surface: #121a16;  --surface2: #18241e;
+    --border: #1f2e26; --accent: #22d3a0;  --accent2: #16a377;
+    --text: #e8f2ee;   --muted: #5a7a6e;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  /* NAV */
+  nav {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center;
+    justify-content: space-between; height: 64px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .cleared-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,211,160,.12);
+    border: 1px solid rgba(34,211,160,.3);
+    color: var(--accent); padding: 5px 12px;
+    border-radius: 20px; font-size: .75rem; font-weight: 600;
+  }
+  /* ... full styles in source file ... */
+</style>
+
+<!-- ===== HTML STRUCTURE ===== -->
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="logo">📋</div>
+    <div><h1>UniFinance Portal</h1></div>
+  </div>
+  <div class="nav-links">
+    <a href="../accounts/accounts.html">⚙ Accounts</a>
+    <a href="registry.html" class="active">📋 Registry</a>
+  </div>
+  <div class="dept-badge">REGISTRY DEPT</div>
+</nav>
+
+<div class="wrapper">
+  <!-- Stats cards -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="val" id="regCount">—</div></div>
+  </div>
+
+  <!-- Search + View Toggle -->
+  <div class="controls">
+    <input id="searchInput" oninput="filterStudents(this.value)"
+           placeholder="Search cleared students…">
+    <button id="refreshBtn" onclick="refresh()">↻ Refresh</button>
+  </div>
+
+  <!-- Table View -->
+  <div id="tableView">
+    <table><thead><tr>
+      <th>#</th><th>Student</th><th>Course</th><th>Fees Paid</th><th>Clearance</th>
+    </tr></thead>
+    <tbody id="regTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Card View (hidden by default) -->
+  <div id="cardsView" style="display:none">
+    <div class="card-grid" id="regCardsBody"></div>
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+const API = './index.php';
+let allCleared = [], filtered = [], currentView = 'table';
+
+async function loadClearedStudents() {
+  const r = await fetch(`${API}?action=get_registry_students`);
+  const d = await r.json();
+  if (d.success) { allCleared = d.data; filtered = [...allCleared]; render(); updateStats(); }
+}
+
+function filterStudents(q) {
+  const ql = q.toLowerCase();
+  filtered = allCleared.filter(s =>
+    !ql || s.full_name.toLowerCase().includes(ql)
+         || s.student_id.toLowerCase().includes(ql)
+         || s.course.toLowerCase().includes(ql)
+  );
+  render();
+}
+
+function renderTable() {
+  document.getElementById('regTableBody').innerHTML = filtered.map((s, i) => `
+    <tr>
+      <td>${String(i+1).padStart(2,'0')}</td>
+      <td>${s.full_name}</td>
+      <td>${s.course}</td>
+      <td>$${parseFloat(s.fees_paid).toFixed(2)}</td>
+      <td><span class="cleared-badge">CLEARED</span></td>
+    </tr>`).join('');
+}
+
+// Auto-refresh every 30 seconds
+loadClearedStudents();
+setInterval(loadClearedStudents, 30000);
+</script>
+</body></html>
